@@ -1,0 +1,82 @@
+import tkinter as tk
+import random
+
+# Word bank:  Nepali words and their English translations
+word_bank = [
+    {"nepali": "ghar", "english": "House"},
+    {"nepali": "pustak", "english": "Book"},
+    {"nepali": "kukur", "english": "Dog"},
+    {"nepali": "biralo", "english": "Cat"},
+    {"nepali": "pani", "english": "Water"},
+    {"nepali": "sathi", "english": "Friend"},
+    {"nepali": "khana", "english": "Food"},
+]
+
+# Initialize game variables
+score = 0
+remaining_words = word_bank[:]  # Copy of the word bank for tracking
+current_question = None
+
+# Functions
+def generate_question():
+    """Generate a new question."""
+    global current_question
+    if remaining_words:
+        current_question = random.choice(remaining_words)
+        question_label.config(text=f"What does '{current_question['nepali']}' mean?")
+        answer_entry.delete(0, tk.END)
+        feedback_label.config(text="")
+    else:
+        game_over()
+
+def check_answer():
+    """Check the player's answer."""
+    global score, remaining_words
+    user_answer = answer_entry.get().strip().lower()
+    correct_answer = current_question["english"].lower()
+    
+    if user_answer == correct_answer:
+        feedback_label.config(text="Correct!", fg="green")
+        score += 10
+        remaining_words.remove(current_question)  # Remove the answered word
+    else:
+        feedback_label.config(text=f"Try again! The correct answer was '{correct_answer}'", fg="red")
+        score -= 10
+    
+    update_score()
+    root.after(2000, generate_question)
+
+def update_score():
+    """Update the score display."""
+    score_label.config(text=f"Score: {score}")
+
+def game_over():
+    """End the game and display the final score."""
+    question_label.config(text="Game Over! You've guessed all the words!")
+    feedback_label.config(text=f"Your final score is: {score}", fg="blue")
+    answer_entry.grid_remove()  # Hide input field
+    submit_button.grid_remove()  # Hide submit button
+
+# GUI Setup
+root = tk.Tk()
+root.title("Learn Nepali")
+
+# Widgets
+score_label = tk.Label(root, text="Score: 0", font=("Arial", 16))
+score_label.grid(row=0, column=0, columnspan=2)
+
+question_label = tk.Label(root, text="", font=("Arial", 14))
+question_label.grid(row=1, column=0, columnspan=2)
+
+answer_entry = tk.Entry(root, font=("Arial", 12), width=20)
+answer_entry.grid(row=2, column=0, columnspan=2)
+
+submit_button = tk.Button(root, text="Submit", font=("Arial", 12), command=check_answer)
+submit_button.grid(row=3, column=0, columnspan=2)
+
+feedback_label = tk.Label(root, text="", font=("Arial", 12))
+feedback_label.grid(row=4, column=0, columnspan=2)
+
+# Start the game
+generate_question()
+root.mainloop()
